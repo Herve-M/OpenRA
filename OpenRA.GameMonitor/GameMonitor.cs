@@ -25,30 +25,39 @@ namespace OpenRA
 		[STAThread]
 		static void Main(string[] args)
 		{
-			var executableDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-			var processName = Path.Combine(executableDirectory, "OpenRA.Game.exe");
+            GameUpdater updater = new GameUpdater(LaunchGame, args);
+            updater.CheckForUpdate();
+            updater.Cleanup();
 
-			Directory.SetCurrentDirectory(executableDirectory);
+            Environment.Exit(0);
+        }
 
-			var psi = new ProcessStartInfo(processName, string.Join(" ", args));
+	    static void LaunchGame(string[] args)
+	    {
+            var executableDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            var processName = Path.Combine(executableDirectory, "OpenRA.Game.exe");
 
-			try
-			{
-				gameProcess = Process.Start(psi);
-			}
-			catch
-			{
-				return;
-			}
+            Directory.SetCurrentDirectory(executableDirectory);
 
-			if (gameProcess == null)
-				return;
+            var psi = new ProcessStartInfo(processName, string.Join(" ", args));
 
-			gameProcess.EnableRaisingEvents = true;
-			gameProcess.Exited += GameProcessExited;
+            try
+            {
+                gameProcess = Process.Start(psi);
+            }
+            catch
+            {
+                return;
+            }
 
-			Application.Run();
-		}
+            if (gameProcess == null)
+                return;
+
+            gameProcess.EnableRaisingEvents = true;
+            gameProcess.Exited += GameProcessExited;
+
+            Application.Run();
+        }
 
 		static void ShowErrorDialog()
 		{
